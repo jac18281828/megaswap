@@ -1,0 +1,77 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "venv",
+            "type": "shell",
+            "command": "${workspaceFolder}/venv/bin/activate",
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "requirements",
+            "type": "shell",
+            "command": "${workspaceFolder}/venv/bin/pip3 install -r requirements.txt -r requirements-dev.txt",
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+        },
+        {
+            "label": "fmt",
+            "type": "shell",
+            "command": "${workspaceFolder}/venv/bin/black --check src",
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "dependsOn": "isort"
+        },
+        {
+            "label": "mypy",
+            "type": "shell",
+            "command": "${workspaceFolder}/venv/bin/python3 -m mypy src",
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "dependsOn": "isort"
+        },
+        {
+            "label": "pylint",
+            "type": "shell",
+            "command": "${workspaceFolder}/venv/bin/python3 -m pylint src",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "options": {
+                "env": {
+                    "PYTHONPATH": "${workspaceFolder}/src"
+                }
+            },
+            "dependsOn": "mypy",
+        },
+        {
+            "label": "test",
+            "type": "shell",
+            "command": "${workspaceFolder}/venv/bin/python3 -m unittest discover -s test",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "options": {
+                "env": {
+                    "PYTHONPATH": "${workspaceFolder}/src"
+                }
+            },
+            "dependsOn": "lint",
+        }
+    ]
+}
