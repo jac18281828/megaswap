@@ -21,4 +21,4 @@ jobs:
         env:
           PYTHONPATH: bot/
         run: |
-          python -m py_compile src/**/*.py
+          python -m py_compile src/*.py
