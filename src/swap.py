@@ -5,7 +5,7 @@ import json
 import logging
 import os
 from contextlib import asynccontextmanager
-from typing import AsyncIterator, Optional
+from typing import AsyncIterator
 
 from dotenv import load_dotenv
 from web3 import AsyncHTTPProvider, AsyncWeb3
@@ -37,10 +37,18 @@ def load_env() -> None:
     """
     Load environment variables from a .env file.
     """
-    load_dotenv()
+    logger.info("Loading environment variables from .env file.")
+    load_dotenv(override=True)
     missing_vars = (
         key
-        for key in ["RPC_URL", "WETH_ADDRESS", "PRIVATE_KEY", "PUBLIC_KEY"]
+        for key in [
+            "RPC_URL",
+            "WETH_ADDRESS",
+            "PRIVATE_KEY",
+            "PUBLIC_KEY",
+            "UNISWAP_ROUTER_ADDRESS",
+            "TOKEN_OUT_ADDRESS",
+        ]
         if key not in os.environ
     )
     missing_vars_list = list(missing_vars)
@@ -56,7 +64,8 @@ async def print_balance(w3: AsyncWeb3, address: str) -> None:
     """
     Print the balance of an address in Ether.
     """
-    balance = await w3.eth.get_balance(address)
+    ck_address = w3.to_checksum_address(address)
+    balance = await w3.eth.get_balance(ck_address)
     ether_balance = w3.from_wei(balance, "ether")
     logger.info("Balance of %s: %s ETH", address, ether_balance)
 
@@ -71,6 +80,33 @@ async def print_weth_balance(w3: AsyncWeb3, address: str, weth_address: str) -> 
     balance = await weth_contract.functions.balanceOf(address).call()
     ether_balance = w3.from_wei(balance, "ether")
     logger.info("WETH Balance of %s: %s WETH", address, ether_balance)
+
+
+async def print_amount_out(
+    w3: AsyncWeb3, amount_in: int, token_in: str, token_out: str
+) -> None:
+    """
+    Print the amount out for a given amount in using Uniswap.
+    """
+    uniswap_router_abi = load_abi("src/abi/UniswapV2Router02.json")
+    uniswap_router_address = os.getenv("UNISWAP_ROUTER_ADDRESS")
+    if not uniswap_router_address:
+        raise ValueError("UNISWAP_ROUTER_ADDRESS environment variable is not set.")
+    uniswap_router_address = w3.to_checksum_address(uniswap_router_address)
+    uniswap_router_contract = w3.eth.contract(
+        address=uniswap_router_address, abi=uniswap_router_abi
+    )
+
+    ck_token_in = w3.to_checksum_address(token_in)
+    ck_token_out = w3.to_checksum_address(token_out)
+
+    amount_out = await uniswap_router_contract.functions.getAmountsOut(
+        amount_in, [ck_token_in, ck_token_out]
+    ).call()
+
+    logger.info(
+        "Amount out for %s %s: %s %s", amount_in, token_in, amount_out[-1], token_out
+    )
 
 
 async def main() -> None:
@@ -88,6 +124,10 @@ async def main() -> None:
     if not rpc_url:
         raise ValueError("RPC_URL environment variable is not set.")
 
+    token_out_address = os.getenv("TOKEN_OUT_ADDRESS")
+    if not token_out_address:
+        raise ValueError("TOKEN_OUT_ADDRESS environment variable is not set.")
+
     logger.info("Connecting to RPC URL: %s", rpc_url)
     logger.info("WETH Address: %s", weth_address)
     logger.info("Public Key: %s", public_key)
@@ -96,6 +136,12 @@ async def main() -> None:
         async with get_web3_provider(rpc_url) as w3:
             await print_balance(w3, public_key)
             await print_weth_balance(w3, public_key, weth_address)
+            await print_amount_out(
+                w3,
+                1000000000000000000,  # 1 ETH in wei
+                weth_address,
+                token_out_address,
+            )
     except ValueError as e:
         logger.error("Error: %s", e)
 
