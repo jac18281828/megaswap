@@ -23,6 +23,16 @@
             },
         },
         {
+            "label": "isort",
+            "type": "shell",
+            "command": "${workspaceFolder}/venv/bin/isort --check src",
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": []
+        },
+        {
             "label": "fmt",
             "type": "shell",
             "command": "${workspaceFolder}/venv/bin/black --check src",
@@ -40,7 +50,7 @@
                 "kind": "build",
                 "isDefault": false
             },
-            "dependsOn": "isort"
+            "dependsOn": "fmt"
         },
         {
             "label": "pylint",

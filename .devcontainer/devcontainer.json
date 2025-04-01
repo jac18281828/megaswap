@@ -8,18 +8,6 @@
 		// Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
 		"dockerfile": "../Dockerfile"
 	},
-	"containerEnv": {
-		"PRIVATE_KEY": "${localEnv:PRIVATE_KEY}",
-		"PUBLIC_KEY": "${localEnv:PUBLIC_KEY}",
-		"RPC_URL": "${localEnv:RPC_URL}",
-		"OPG_URL": "${localEnv:OPG_URL}",
-		"OPS_URL": "${localEnv:OPS_URL}",
-		"ARS_URL": "${localEnv:ARS_URL}",
-		"MEGA_URL": "${localEnv:MEGA_URL}",
-		"HOLESKY_URL": "${localEnv:HOLESKY_URL}",
-		"ETHERSCAN_API_KEY": "${localEnv:ETHERSCAN_API_KEY}",
-		"ARBISCAN_API_KEY": "${localEnv:ARBISCAN_API_KEY}"
-	},
 	"customizations": {
 		"vscode": {
 			"extensions": [

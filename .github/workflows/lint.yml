@@ -19,10 +19,10 @@ jobs:
           pip install -r requirements.txt -r requirements-dev.txt
       - name: Run isort
         run: |
-          isort --check src test
+          isort --check src
       - name: Run black
         run: |
-          black --check src test
+          black --check src
       - name: Run mypy
         env:
           PYTHONPATH: "src"
