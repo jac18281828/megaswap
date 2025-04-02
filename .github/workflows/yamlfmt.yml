@@ -13,10 +13,10 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: 1.22.4
+          go-version: 1.x
       - name: Install yamlfmt
         run: |
-          go install github.com/google/yamlfmt/cmd/yamlfmt@latest
+          go install github.com/google/yamlfmt/cmd/yamlfmt@v0.16.0
           strip $(which yamlfmt)
       - name: yamlfmt github workflows
         run: yamlfmt -lint .github/*.yml .github/workflows/*.yml

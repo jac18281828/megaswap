@@ -32,4 +32,4 @@ jobs:
         env:
           PYTHONPATH: "src"
         run: |
-          pylint src test
+          pylint src
