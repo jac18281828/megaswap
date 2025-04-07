@@ -1,6 +1,6 @@
-FROM jac18281828/python3:latest
+FROM ghcr.io/jac18281828/python3:latest
 
-WORKDIR /build/src
+WORKDIR /workspaces/megaswap
 
 COPY . .
 

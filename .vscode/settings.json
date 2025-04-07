@@ -1,11 +1,7 @@
 {
     "terminal.integrated.env.linux": {
         "VIRTUAL_ENV": "${workspaceFolder}/venv",
-        "PATH": "${workspaceFolder}/venv/bin:${env:PATH}:~/.vscode-server/bin/ddc367ed5c8936efe395cffeec279b04ffd7db78/bin/remote-cli/"
-    },
-    "terminal.integrated.env.windows": {
-        "VIRTUAL_ENV": "${workspaceFolder}\\venv",
-        "PATH": "${workspaceFolder}\\venv\\Scripts;${env:PATH}:~/.vscode-server/bin/ddc367ed5c8936efe395cffeec279b04ffd7db78/bin/remote-cli/"
+        "PATH": "${workspaceFolder}/venv/bin:${env:PATH}:/home/py3/.bun/bin"
     },
     "terminal.integrated.defaultProfile.linux": "bash",
     "terminal.integrated.profiles.linux": {
