@@ -194,7 +194,7 @@ async def main() -> None:
                 if blockchain == "MegaETH" and symbol != "ETH":
 
                     address = token["address"]
-                    decimals = float(token["decimals"])
+                    decimals = int(token["decimals"])
                     logger.debug("checking token %s (%s)", symbol, address)
                     is_pair = await get_pair(w3, weth_address, address)
                     logger.info(

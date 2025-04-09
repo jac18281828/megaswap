@@ -27,6 +27,7 @@ jobs:
         env:
           PYTHONPATH: "src"
         run: |
+          yes | mypy --install-types 
           mypy src
       - name: Run pylint
         env:
