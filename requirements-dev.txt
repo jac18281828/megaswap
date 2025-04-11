@@ -3,4 +3,4 @@ pylint==3.3.6
 black==25.1.0
 isort==6.0.1
 types-aiofiles==24.1.0.20250326
-types-pyyaml==6.0.12.20241230
+types-pyyaml==6.0.12.20250402
