@@ -22,4 +22,3 @@ jobs:
           PYTHONPATH: "src"
         run: |
           python -m unittest discover -s test -p "*.py"
-          
