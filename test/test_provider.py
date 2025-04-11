@@ -82,6 +82,22 @@ class TestProvider(unittest.IsolatedAsyncioTestCase):
     @patch("provider.logger")
     def test_load_env_success(self, mock_logger, mock_load_dotenv):
         """Test that load_env successfully loads environment variables when all are present."""
+
+        keep_env = os.environ.copy()
+
+        os.environ.update(
+            {
+                "RPC_URL": "https://example.com/rpc",
+                "WETH_ADDRESS": "0x1234567890abcdef",
+                "PRIVATE_KEY": "private_key_value",
+                "PUBLIC_KEY": "public_key_value",
+                "UNISWAP_ROUTER_ADDRESS": "0xabcdef1234567890",
+                "TOKEN_OUT_ADDRESS": "0x0987654321fedcba",
+                "WETH_DECIMALS": "18",
+                "TOKEN_OUT_DECIMALS": "18",
+            }
+        )
+
         # Call the function
         load_env()
 
@@ -93,6 +109,9 @@ class TestProvider(unittest.IsolatedAsyncioTestCase):
             "Loading environment variables from .env file."
         )
         mock_logger.info.assert_any_call("Environment variables loaded successfully.")
+
+        os.environ.clear()
+        os.environ.update(keep_env)
 
     @patch("provider.load_dotenv")
     def test_load_env_missing_vars(self, _mock_load_dotenv):
