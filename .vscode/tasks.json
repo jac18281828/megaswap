@@ -25,7 +25,7 @@
         {
             "label": "isort",
             "type": "shell",
-            "command": "${workspaceFolder}/venv/bin/isort --check src",
+            "command": "${workspaceFolder}/venv/bin/isort --check src test",
             "group": {
                 "kind": "build",
                 "isDefault": false
@@ -35,7 +35,7 @@
         {
             "label": "fmt",
             "type": "shell",
-            "command": "${workspaceFolder}/venv/bin/black --check src",
+            "command": "${workspaceFolder}/venv/bin/black --check src test",
             "group": {
                 "kind": "build",
                 "isDefault": false
@@ -45,7 +45,7 @@
         {
             "label": "mypy",
             "type": "shell",
-            "command": "${workspaceFolder}/venv/bin/python3 -m mypy src",
+            "command": "${workspaceFolder}/venv/bin/python3 -m mypy src test",
             "group": {
                 "kind": "build",
                 "isDefault": false
@@ -53,9 +53,9 @@
             "dependsOn": "fmt"
         },
         {
-            "label": "pylint",
+            "label": "lint",
             "type": "shell",
-            "command": "${workspaceFolder}/venv/bin/python3 -m pylint src",
+            "command": "${workspaceFolder}/venv/bin/python3 -m pylint src test",
             "problemMatcher": [],
             "group": {
                 "kind": "build",

@@ -19,18 +19,19 @@ jobs:
           pip install -r requirements.txt -r requirements-dev.txt
       - name: Run isort
         run: |
-          isort --check src
+          isort --check src test
       - name: Run black
         run: |
-          black --check src
+          black --check src test
       - name: Run mypy
         env:
           PYTHONPATH: "src"
         run: |
-          yes | mypy --install-types 
+          yes | mypy --install-types src test
           mypy src
       - name: Run pylint
         env:
           PYTHONPATH: "src"
         run: |
-          pylint src
+          pylint src test
+

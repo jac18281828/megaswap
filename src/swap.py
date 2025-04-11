@@ -1,16 +1,14 @@
 """Trade on uniswap - swap tokens"""
 
 import asyncio
-import json
 import logging
 import os
-from contextlib import asynccontextmanager
-from typing import AsyncIterator
+from typing import Optional
 
-import aiofiles
-import yaml
-from dotenv import load_dotenv
-from web3 import AsyncHTTPProvider, AsyncWeb3
+from web3 import AsyncWeb3
+from web3.exceptions import ContractLogicError
+
+from provider import get_web3_provider, load_abi, load_env, load_yaml
 
 logger = logging.getLogger(__name__)
 
@@ -19,56 +17,7 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 
-
 TOKEN_FILE = "token.yaml"
-
-
-@asynccontextmanager
-async def get_web3_provider(rpc_url: str) -> AsyncIterator[AsyncWeb3]:
-    """Context manager to get a Web3 provider with a shared session"""
-    provider = AsyncHTTPProvider(rpc_url)
-    w3 = AsyncWeb3(provider)
-    try:
-        yield w3
-    finally:
-        # We don't close the session here as it's shared
-        pass
-
-
-async def load_abi(file_path: str) -> dict:
-    """
-    Load an ABI from a file.
-    """
-    async with aiofiles.open(file_path, "r", encoding="utf-8") as file:
-        contents = await file.read()
-    return json.loads(contents)
-
-
-def load_env() -> None:
-    """
-    Load environment variables from a .env file.
-    """
-    logger.info("Loading environment variables from .env file.")
-    load_dotenv(override=True)
-    missing_vars = (
-        key
-        for key in [
-            "RPC_URL",
-            "WETH_ADDRESS",
-            "PRIVATE_KEY",
-            "PUBLIC_KEY",
-            "UNISWAP_ROUTER_ADDRESS",
-            "TOKEN_OUT_ADDRESS",
-        ]
-        if key not in os.environ
-    )
-    missing_vars_list = list(missing_vars)
-    if missing_vars_list:
-        var_list = ", ".join(missing_vars_list)
-        raise ValueError(
-            f"Missing required environment variables: {var_list} visit .env"
-        )
-    logger.info("Environment variables loaded successfully.")
 
 
 async def print_balance(w3: AsyncWeb3, address: str) -> None:
@@ -124,7 +73,7 @@ async def print_amount_out(
     )
 
 
-async def get_pair(w3: AsyncWeb3, token_a: str, token_b: str) -> bool:
+async def get_pair(w3: AsyncWeb3, token_a: str, token_b: str) -> Optional[str]:
     """
     Get the pair address for two tokens.
     """
@@ -140,21 +89,29 @@ async def get_pair(w3: AsyncWeb3, token_a: str, token_b: str) -> bool:
     ck_token_a = w3.to_checksum_address(token_a)
     ck_token_b = w3.to_checksum_address(token_b)
 
-    pair_address = await uniswap_factory_contract.functions.getPair(
-        ck_token_a, ck_token_b
-    ).call()
+    try:
+        pair_address = await uniswap_factory_contract.functions.getPair(
+            ck_token_a, ck_token_b
+        ).call()
 
-    return pair_address != "0x"
+        if not pair_address:
+            logger.info("No pair found for %s and %s", token_a, token_b)
+            return None
+        logger.info("Pair address for %s and %s: %s", token_a, token_b, pair_address)
+        return pair_address
+    except ContractLogicError as err:
+        logger.error("Error getting pair address: %s", err)
+        logger.exception(err)
+        return None
 
 
 async def load_each_token():
     """
     Load each token from the token.yaml file.
     """
-
-    async with aiofiles.open(TOKEN_FILE, "r") as f:
-        content = await f.read()
-        tokens = yaml.safe_load(content)
+    tokens = await load_yaml(TOKEN_FILE)
+    assert tokens, "No tokens found in the token.yaml file."
+    assert "tokens" in tokens, "No tokens found in the token.yaml file."
     return tokens["tokens"]
 
 
@@ -162,7 +119,6 @@ async def main() -> None:
     """
     Main function to run the script.
     """
-    load_env()
     weth_address = os.getenv("WETH_ADDRESS")
     public_key = os.getenv("PUBLIC_KEY")
 
@@ -196,7 +152,7 @@ async def main() -> None:
                     address = token["address"]
                     decimals = int(token["decimals"])
                     logger.debug("checking token %s (%s)", symbol, address)
-                    is_pair = await get_pair(w3, weth_address, address)
+                    is_pair = await get_pair(w3, weth_address, address) is not None
                     logger.info(
                         "Is there a pair for %s and %s, %s? %s",
                         weth_address,
@@ -217,4 +173,5 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
+    load_env()
     asyncio.run(main())
